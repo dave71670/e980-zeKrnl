@@ -50,7 +50,13 @@ config ARCH_MSM7X30
 	select MSM_REMOTE_SPINLOCK_DEKKERS
 	select ARCH_SPARSEMEM_ENABLE
 	select ARCH_HAS_HOLES_MEMORYMODEL
+	select MEMORY_HOTPLUG
+	select MEMORY_HOTREMOVE
+	select ARCH_ENABLE_MEMORY_HOTPLUG
+	select ARCH_ENABLE_MEMORY_HOTREMOVE
 	select MIGRATION
+	select ARCH_MEMORY_PROBE
+	select ARCH_MEMORY_REMOVE
 	select MSM_GPIOMUX
 	select RESERVE_FIRST_PAGE
 	select MSM_DALRPC
@@ -159,6 +165,7 @@ config ARCH_MSM8960
 	select MSM_NATIVE_RESTART
 	select DONT_MAP_HOLE_AFTER_MEMBANK0
 	select MSM_REMOTE_SPINLOCK_SFPB
+	select ARCH_SPARSEMEM_ENABLE
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select CLEANCACHE
 	select QCACHE
@@ -199,6 +206,7 @@ config ARCH_MSM8930
 	select MSM_NATIVE_RESTART
 	select DONT_MAP_HOLE_AFTER_MEMBANK0
 	select MSM_REMOTE_SPINLOCK_SFPB
+	select ARCH_SPARSEMEM_ENABLE
 	select ARCH_HAS_HOLES_MEMORYMODEL
 	select MSM_ULTRASOUND
 	select MULTI_IRQ_HANDLER
@@ -413,15 +421,16 @@ config  ARCH_MSM_SCORPIONMP
 	select ARCH_MSM_SCORPION
 	select MSM_SMP
 	select HAVE_ARCH_HAS_CURRENT_TIMER
-	select MSM_JTAG if MSM_QDSS
+	select MSM_JTAG if CORESIGHT_ETM
 	bool
 
 config  ARCH_MSM_KRAITMP
 	select ARCH_MSM_KRAIT
 	select MSM_SMP
 	select HAVE_ARCH_HAS_CURRENT_TIMER
-	select MSM_JTAG if MSM_QDSS
+	select MSM_JTAG if CORESIGHT_ETM
 	bool
+	select HAVE_HW_BRKPT_RESERVED_RW_ACCESS
 
 config  ARCH_MSM_CORTEXMP
 	select MSM_SMP
@@ -435,6 +444,7 @@ config  MSM_RESTART_V2
 
 config  ARCH_MSM_CORTEX_A5
 	bool
+	select HAVE_HW_BRKPT_RESERVED_RW_ACCESS
 
 config ARCH_MSM7X27A
 	bool
@@ -917,9 +927,13 @@ config MACH_FSM9XXX_SURF
 	  chipset based SURF evaluation board and
 	  FFA board.
 
+config MACH_MSM_DUMMY
+	bool "NONE (No device)"
+
 endmenu
 
 source "arch/arm/mach-msm/lge/Kconfig"
+
 config MSM_STACKED_MEMORY
 	bool "Stacked Memory"
 	default y
@@ -1631,6 +1645,17 @@ config MSM_CPU_FREQ_MIN
 
 endif # CPU_FREQ_MSM
 
+config MSM_CPUFREQ_LIMITER
+	tristate "MSM CPU frequency limiter"
+	default n
+	help
+	  This driver limits MSM CPU frequency through sysfs file system.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_stats.
+
+	  If in doubt, say N.
+
 config MSM_AVS_HW
 	bool "Enable Adaptive Voltage Scaling (AVS)"
 	default n
@@ -2029,7 +2054,8 @@ config MSM_LPASS_8960
 
 config MSM_WCNSS_SSR_8960
 	tristate "MSM 8960 WCNSS restart module"
-	depends on (ARCH_MSM8960)
+	depends on ARCH_MSM8960
+	depends on WCNSS_CORE
 	help
 	 This option enables the WCNSS restart module for MSM8960, which
 	 monitors WCNSS hardware watchdog interrupt lines and plugs WCNSS
@@ -2214,8 +2240,22 @@ config MSM_JTAG
 	  software running on the target. Enabling this will ensure debug
 	  and ETM registers are saved and restored across power collapse.
 
-	  For production builds, you should probably say 'N' here to avoid
-	  potential power, performance and memory penalty.
+	  If unsure, say 'N' here to avoid potential power, performance and
+	  memory penalty.
+
+config MSM_JTAG_MM
+	bool "Debug and ETM trace support across power collapse using memory mapped access"
+	help
+	  Enables support for debugging (specifically breakpoints) and ETM
+	  processor tracing across power collapse both for JTag and OS hosted
+	  software running on the target. Enabling this will ensure debug
+	  and ETM registers are saved and restored across power collapse.
+
+	  Required on targets on which cp14 access to debug and ETM registers is
+	  not permitted and so memory mapped access is necessary.
+
+	  If unsure, say 'N' here to avoid potential power, performance and
+	  memory penalty.
 
 config MSM_ETM
 	tristate "Enable MSM ETM and ETB"
@@ -2340,7 +2380,7 @@ config MSM_AUDIO_QDSP6V2
 config MSM_ADSP_LOADER
         tristate "ADSP loader support"
         select SND_SOC_MSM_APRV2_INTF
-	depends on MSM_AUDIO_QDSP6V2 && m
+	depends on MSM_AUDIO_QDSP6V2 || MSM_AUDIO_QDSP6
         help
           Enable ADSP image loader.
 	  The ADSP loader brings ADSP out of reset
