@@ -22,11 +22,11 @@ Since I'm too lazy to write another README for every branch I have:
 - **lp-testing** and **kk-dev** are main development branches; you may try to build something, but there is no warranty it will work.
 - random branches with exp, experimental,danger,whoa etc. in names - don't touch, or kittens will die.
 
-Current STABLE version is tagged as v1.3. Ignore the fact that there is no version 1.2.
+Current STABLE version is tagged as v1.4. Ignore the fact that there is no version 1.2.
 
 ## Progress
 
-Current version is **v1.3**.
+Current version is **v1.4**.
 
 - [x] CPU Governors
 	- [x] Intellidemand
@@ -36,6 +36,7 @@ Current version is **v1.3**.
 	- [x] Lionheart
 	- [x] SmartassV2
 	- [x] Adaptive
+	- [x] ondemandPLUS
 - [x] Thermal control
 	- [x] Thermald
 	- [x] Intellithermal
@@ -57,12 +58,13 @@ Current version is **v1.3**.
 	- [x] lp
 	- [x] yeah
 	- [x] illinois
-- [x] CPU input boost [in kk-dev]
-- [x] Stock (LG) camera driver [in kk-dev]
+- [x] CPU input boost
+- [x] CPU retain policy (thanks EmmanuelU)
+- [ ] Stock (LG) camera driver [reverted, missing file]
 - [x] Faux sound
 - [x] Fast charge
-- [x] exFAT support [in code, needs more patching]
-- [x] Voltage control [in kk-dev]
+- [ ] exFAT support [in code, needs more patching]
+- [x] Voltage control
 - [ ] CPU overclocking
 - [ ] GPU overclocking
 - [x] Double tap to wake
@@ -70,3 +72,4 @@ Current version is **v1.3**.
 - [ ] Update to newer kernel-3.4 repos [trying to figure out how]
 - [x] Support for Lollipop (CM12.x) [in testing] and later Android M [are you kidding me, it isn't even released yet]
 - [ ] Additional tweaks and features -> feel free to ask & request
+- [x] Ultra-cool semi-automated build script with boot.img and flashable zip generation
