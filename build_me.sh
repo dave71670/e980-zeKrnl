@@ -199,7 +199,7 @@ function generate_bootImg {
 		echo "++ Generating MD5 sums for zip files..."
 		cur_dir="$PWD"
 		cd "$PWD/build_tools/out/"
-		md5sum_nosign=$(md5sum ZIP_FILE_NAME)
+		md5sum_nosign=$(md5sum $ZIP_FILE_NAME)
 		md5sum_sign=$(md5sum $ZIP_FILE_NAME_SIGNED)
 		cd "$cur_dir"
 		echo "++ $md5sum_nosign"
