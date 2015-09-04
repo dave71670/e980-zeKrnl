@@ -54,13 +54,13 @@ defconfig_name="cyanogenmod_e980_defconfig"
 jobs=2
 
 # Name of example boot.img to use for boot.img regeneration
-template_bootimg="boot-pac-kk.img"
+template_bootimg="boot-cm12.1.img"
 
 # Kernel name
-KERNEL_NAME="zeKernel"
+KERNEL_NAME=$(sed -n '/DEVEL_NAME/p' Makefile | head -1 | cut -d'=' -f 2)
 
 # Kernel version appendix
-KERNEL_VERSION="-kk-dev"
+KERNEL_VERSION=$(sed -n '/EXTRAVERSION/p' Makefile | head -1 | cut -d'=' -f 2)
 
 # Build timestamp
 TIMESTAMP=$(date +"%d%m%Y-%H%m%S")
@@ -122,9 +122,9 @@ function generate_bootImg {
 	
 	# Cleanup
 	echo "++ Cleaning up..."
-	rm -rvf "template_img/bootimg.cfg"
-	rm -rvf "template_img/initrd.img"
-	rm -rvf "template_img/zImage"
+	rm -rvf "build_tools/template_img/bootimg.cfg"
+	rm -rvf "build_tools/template_img/initrd.img"
+	rm -rvf "build_tools/template_img/zImage"
 	
 	# Generate flashable zip if boot image is created
 	echo " "
@@ -212,7 +212,7 @@ function generate_bootImg {
 function start_build {
 	mess=0
 	
-	echo "-> Starting build..."
+	echo "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
 	echo " "
 	
 	# Let's check does defconfig file exist
