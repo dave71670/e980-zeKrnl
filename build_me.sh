@@ -63,7 +63,7 @@ KERNEL_NAME=$(sed -n '/DEVEL_NAME/p' Makefile | head -1 | cut -d'=' -f 2)
 KERNEL_VERSION=$(sed -n '/EXTRAVERSION/p' Makefile | head -1 | cut -d'=' -f 2)
 
 # Build timestamp
-TIMESTAMP=$(date +"%d%m%Y-%H%m%S")
+TIMESTAMP=$(date +"%d%m%Y-%H%M%S")
 
 # Build number prefix
 BUILD_NUM_PREFIX="_#"
@@ -197,8 +197,11 @@ function generate_bootImg {
 		# Generate MD5 sums for zips
 		echo " "
 		echo "++ Generating MD5 sums for zip files..."
-		md5sum_nosign=$(md5sum $PWD/build_tools/out/$ZIP_FILE_NAME)
-		md5sum_sign=$(md5sum $PWD/build_tools/out/$ZIP_FILE_NAME_SIGNED)
+		cur_dir="$PWD"
+		cd "$PWD/build_tools/out/"
+		md5sum_nosign=$(md5sum ZIP_FILE_NAME)
+		md5sum_sign=$(md5sum $ZIP_FILE_NAME_SIGNED)
+		cd "$cur_dir"
 		echo "++ $md5sum_nosign"
 		echo "++ $md5sum_sign"
 		echo $md5sum_nosign >> "$PWD/build_tools/out/$ZIP_FILE_NAME.md5sum"
