@@ -194,6 +194,17 @@ function generate_bootImg {
 		java -jar "build_tools/tools/SignApk/signapk.jar" "build_tools/tools/SignApk/testkey.x509.pem" "build_tools/tools/SignApk/testkey.pk8" "build_tools/out/$ZIP_FILE_NAME" "build_tools/out/$ZIP_FILE_NAME_SIGNED"
 		echo "++ Done."	
 		
+		# Generate MD5 sums for zips
+		echo " "
+		echo "++ Generating MD5 sums for zip files..."
+		md5sum_nosign=$(md5sum $PWD/build_tools/out/$ZIP_FILE_NAME)
+		md5sum_sign=$(md5sum $PWD/build_tools/out/$ZIP_FILE_NAME_SIGNED)
+		echo "++ $md5sum_nosign"
+		echo "++ $md5sum_sign"
+		echo $md5sum_nosign >> "$PWD/build_tools/out/$ZIP_FILE_NAME.md5sum"
+		echo $md5sum_sign >> "$PWD/build_tools/out/$ZIP_FILE_NAME_SIGNED.md5sum"
+	
+		
 		# Cleanup
 		echo " "
 		echo "++ Removing tmp directory"
