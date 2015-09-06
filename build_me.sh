@@ -18,7 +18,7 @@
 ## Let me introduce myself...
 
 echo ">>>>> zeKrnl build script for LG Optimus G Pro E98x"
-echo ">>>>> Based on work from zamajalo@xda, with my modifications and additions"
+echo ">>>>> Written and fixed by gromikakao@github (https://github.com/gromikakao/), based oon old script from XDA"
 echo ">>>>> Licenced as GPL, so you can share & edit, just don't make it forget who original author is"
 echo " "
 echo " "
