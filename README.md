@@ -10,14 +10,20 @@ to support F240x variants for sake of reasons - first of all, I don't
 have that device, second - I don't know anything about it, so far it 
 was proven that F240x is different for more than modem.
 
-Currenlty supported Android version is 4.4, which mean all CM11.0 
-based ROMs will support it. I myself I'm using it on PAC 4.4.
+--Currently supported Android version is 4.4, which mean all CM11.0 
+based ROMs will support it. I myself I'm using it on PAC 4.4.--
+
+Since 07. september 2015 this kernel supports BOTH KitKat and Lollipop (CM11.0 AND CM12.1) ROMs.
+Sources for both versions can be found on their branches:
+- **kk-stable**, for CM11.0 and CM11.0 based ROMs
+- **lp-stable**, for CM12.1 and CM12.1 based ROMs (note: haven't tested it on CM12.0, but it should work. Try it and tell me)
 
 ## Branching and versioning
+
 Since I'm too lazy to write another README for every branch I have:
 
 - **master** branch is used as a starting point. Highly stable, but will not be updated after v1.3
-- **kk-stable** is main stable branch. This is the one you want to build from, and this one will be updated.
+- **kk-stable** and **lp-stable** are main stable branches. Those are the ones you want to build from, and they will be updated.
 - **caf/LA.AF.1.1_rb1.18** and **e980-kk-LA.AF** are pure CAF msm8960/apq8064 code, so don't try to do anything with them.
 - **lp-testing** and **kk-dev** are main development branches; you may try to build something, but there is no warranty it will work.
 - random branches with exp, experimental,danger,whoa etc. in names - don't touch, or kittens will die.
