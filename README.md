@@ -10,8 +10,8 @@ to support F240x variants for sake of reasons - first of all, I don't
 have that device, second - I don't know anything about it, so far it 
 was proven that F240x is different for more than modem.
 
---Currently supported Android version is 4.4, which mean all CM11.0 
-based ROMs will support it. I myself I'm using it on PAC 4.4.--
+~~Currently supported Android version is 4.4, which mean all CM11.0 
+based ROMs will support it. I myself I'm using it on PAC 4.4.~~
 
 Since 07. september 2015 this kernel supports BOTH KitKat and Lollipop (CM11.0 AND CM12.1) ROMs.
 Sources for both versions can be found on their branches:
