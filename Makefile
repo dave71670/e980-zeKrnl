@@ -1,7 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 4
 SUBLEVEL = 0
-EXTRAVERSION =-v1.4_kk
+EXTRAVERSION =-v1.4_kk-main
 NAME = Saber-toothed Squirrel
 DEVEL_NAME=zeKrnl
 
