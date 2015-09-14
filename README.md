@@ -15,20 +15,22 @@ based ROMs will support it. I myself I'm using it on PAC 4.4.~~
 
 Since 07. september 2015 this kernel supports BOTH KitKat and Lollipop (CM11.0 AND CM12.1) ROMs.
 Sources for both versions can be found on their branches:
-- **kk-stable**, for CM11.0 and CM11.0 based ROMs
-- **lp-stable**, for CM12.1 and CM12.1 based ROMs (note: haven't tested it on CM12.0, but it should work. Try it and tell me)
+- **kk-main**, for CM11.0 and CM11.0 based ROMs
+- **lp-main**, for CM12.1 and CM12.1 based ROMs (note: haven't tested it on CM12.0, but it should work. Try it and tell me)
 
 ## Branching and versioning
 
 Since I'm too lazy to write another README for every branch I have:
 
 - **master** branch is used as a starting point. Highly stable, but will not be updated after v1.3
-- **kk-stable** and **lp-stable** are main stable branches. Those are the ones you want to build from, and they will be updated.
-- **caf/LA.AF.1.1_rb1.18** and **e980-kk-LA.AF** are pure CAF msm8960/apq8064 code, so don't try to do anything with them.
-- **lp-testing** and **kk-dev** are main development branches; you may try to build something, but there is no warranty it will work.
+- **kk-main** and **lp-main** are main stable branches. Those are the ones you want to build from, and they will be updated.
+- **caf/LA.AF.1.1_rb1.18** and **e980-kk-LA.AF** are pure CAF msm8960/apq8064 code, so don't try to do anything with them. WILL BE REMOVED SOON
+- **lp-testing**, **lp-stable**, **kk-stable** are now deprecated and exist for sole history purposes, all work is now moved towards **lp-dev** and **kk-dev**
+- **lp-dev** and **kk-dev** are main development branches
 - random branches with exp, experimental,danger,whoa etc. in names - don't touch, or kittens will die.
 
-Current STABLE version is tagged as v1.4. Ignore the fact that there is no version 1.2.
+Current STABLE **KitKat** version is tagged as v1.4. There is no stable lollipop version yet, haven't got enough time to test it.
+Ignore the fact that there is no version 1.2.
 
 ## Progress
 
@@ -69,7 +71,7 @@ Current version is **v1.4**.
 - [ ] Stock (LG) camera driver [reverted, missing file]
 - [x] Faux sound
 - [x] Fast charge
-- [ ] exFAT support [in code, needs more patching]
+- [ ] exFAT support [reverted, needs more patching]
 - [x] Voltage control
 - [ ] CPU overclocking
 - [ ] GPU overclocking
