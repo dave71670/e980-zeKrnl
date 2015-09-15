@@ -74,6 +74,16 @@ device_arch="arm"
 
 ## It's fun time! Don't edit this if you really don't have a need for that.
 
+# Variables needed for command line options. 0 = not set, 1=yes, 2=no
+# - Create new config
+NEW_CONFIG=0
+# - Clean up
+CLEAN_UP=0
+# - Generate boot.img
+BOOT_IMG_GEN=0
+# - Generate flashable zip
+ZIP_GEN=0
+
 # Function to generate boot image and flashable zip
 function generate_bootImg {
 	# Check if abootimg binary exist
@@ -106,7 +116,6 @@ function generate_bootImg {
 	fi
 	
 	# Generate new boot.img
-	bootImgState=1
 	echo "+ Starting generation of new boot.img"
 	echo " "
 	echo "++ Copying zImage from arch/$ARCH/boot..."
@@ -117,7 +126,6 @@ function generate_bootImg {
 		echo "+++ Success, boot.img generated"
 	else
 		echo "+++ Failure, boot.img not generated"
-		bootImgState=0
 	fi
 	
 	# Cleanup
@@ -126,9 +134,24 @@ function generate_bootImg {
 	rm -rvf "build_tools/template_img/initrd.img"
 	rm -rvf "build_tools/template_img/zImage"
 	
+	if [ -e "$PWD/build_tools/boot.img"	]; then
+		echo "+ Do you want to generate flashable zip?"
+		select ans in "y" "n"; do
+			case $ans in
+				y )
+					generate_flashableZip
+					break;;
+				n)
+					break;;
+			esac
+		done
+	fi
+}
+
+function generate_flashableZip {
 	# Generate flashable zip if boot image is created
 	echo " "
-	if [ $bootImgState == 1 ]; then
+	if [ -e "$PWD/build_tools/boot.img"	]; then
 		echo "+ Generating flashable zip"
 		# Create tmp directory if doesn't exist
 		if [ ! -d "build_tools/tmp" ]; then
@@ -222,7 +245,8 @@ function generate_bootImg {
 	fi
 }
 
-# Function to start build
+
+## Function to start build in trivia mode
 function start_build {
 	mess=0
 	
@@ -345,7 +369,7 @@ function start_build {
 	echo " "
 	echo "++ Starting build #$(cat .build_no)"
 	echo " "				
-	make -j$jobs;
+	time make -j$jobs;
 	
 	# Check if build was a success and if yes, ask user for boot.img generation
 	if [ -e "$PWD/arch/$ARCH/boot/zImage" ]; then
@@ -369,9 +393,163 @@ function start_build {
 		exit
 	fi
 }
+
+## Function to start build with parameters given on command-line
+function start_build_cmd {
+	echo "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
+	echo " "
+	
+	# Let's check does defconfig file exist
+	echo "+ Checking if $defconfig_name exists in $PWD/arch/$ARCH/configs/"
+	if [ ! -e "$PWD/arch/$ARCH/configs/$defconfig_name" ]; then
+		echo "++ ERROR: defconfig doesn't exist. Check the filename and file presence and try again"
+		exit
+	fi
+	
+	echo " "
+	
+	##### CHECK CONFIG BLOCK #####
+	
+	# First, let's check if user wants new configuration or to recreate
+	if [[ $NEW_CONFIG==1 ]]; then
+		echo "++ Removing any old configs, cleaning up and making new config"
+		# Check if old config is there, delete it and run mrproper
+		if [ -e "$PWD/.config" ]; then 
+			rm -rvf "$PWD/.config";
+			make mrproper
+		fi
+		
+		make $defconfig_name
+		
+		if [ -e ".build_no" ]; then
+			rm -rvf ".build_no"
+		fi
+		echo "1" >> ".build_no"
+		
+		# Check if configuration is actually made
+		if [ -e "$PWD/.config" ]; then
+			echo " "
+			echo "+++ New configuration created!"
+			echo " "
+		else
+			echo " "
+			echo "+++ ERROR: make defconfig never finished, aborting..."
+			exit
+		fi	
+	elif [[ $NEW_CONFIG==2 ]]; then
+		# Let's make sure user isn't a complete idiot...
+		echo "++ Checking if config exists..."
+		if [ ! -e "$PWD/.config" ]; then
+			echo "+++ Config doesn't exist, creating!"
+			make $defconfig_name
+		else
+			echo "+++ Config found, resuming normal operation"
+			if [ -e ".build_no" ]; then
+				old_build_num=`cat .build_no`
+				new_build_num=$((old_build_num+1))
+				rm -r ".build_no"
+				echo "$new_build_num" >> ".build_no"
+			else
+				echo "1" >> ".build_no"
+			fi	
+		fi
+	else
+		# User was a lazy ass and didn't specify a valid value for config state,
+		# so we're gonna assume that he wants new config
+		echo "++ Creating new config and cleaning up since there was no input about this one..."
+		make mrproper
+		make $defconfig_name
+		# Check if configuration is actually made
+		if [ -e "$PWD/.config" ]; then
+			echo " "
+			echo "+++ New configuration created!"
+			echo " "
+		else
+			echo " "
+			echo "+++ ERROR: make defconfig never finished, aborting..."
+			exit
+		fi	
+	fi
+	
+	##### CHECK CLEAN BLOCK #####
+	is_dirty=$(find . name "*.o" | wc -l)
+	if [[ $CLEAN_UP==1 ]]; then
+		echo "++ Checking if there is something to clean..."
+		if [[ $is_dirty>0 ]]; then
+			echo "+++ Output is dirty, running make clean"
+			make clean
+		else
+			echo "+++ Output is not dirty, resuming..."
+		fi
+	elif [[ $CLEAN_UP==2 ]]; then
+		echo "++ Using dirty output... beware, Dragons passing by."
+	else 
+		echo "++ Wrong value for needed parameter, assuming 'keep dirty'"
+	fi
+	
+	
+	##### RUN THE BUILD #####
+	echo "+ All set. Starting build"
+	echo " "
+	echo "++ Starting build #$(cat .build_no)"
+	echo " "				
+	time make -j$jobs;
+	
+	# Check if build was a success and if yes, ask user for boot.img generation
+	if [ -e "$PWD/arch/$ARCH/boot/zImage" ]; then
+		echo " "
+		echo "+ Build successful."
+	else
+		echo " "
+		echo "+ Build failed; check output for errors and try again after fixing them"
+		exit
+	fi
+	
+	##### CREATE BOOT.IMG #####
+	echo " "
+	if [[ $BOOT_IMG_GEN==1 ]]; then
+		generate_bootImg
+	else 
+		# Check if there is an old boot.img, and remove it.
+		if [ -e "$PWD/build_tools/boot.img" ]; then
+			echo "+ Removing boot.img from previous build"
+			rm -rvf "$PWD/build_tools/boot.img"
+		fi
+	fi
+	
+	##### CREATE FLASHABLE ZIP #####
+	if [[ $ZIP_GEN==1 ]]; then
+		if [[ $BOOT_IMG_GEN==2 ]]; then
+			echo "+ You have selected to create a new flashable zip, but you don't want to create new boot.img... Sum-ting-wrong"
+			echo "++ Generating new boot.img for you..."
+			generate_bootImg
+		fi
+		generate_flashableZip
+	fi
+	
+	echo "+++++ DONE +++++"
+	
+}
+
 ## Function to check does python venv exist
 function createVenv {
 	pyvenv --system-site-packages --copies "$venv_path"
+}
+
+## Print help message if some of script parameters are bad
+function print_error_msg {
+	echo "/*********************** HELP! ***************************/"
+	echo "To use turn-table mode, don't pass any arguments."
+	echo " "
+	echo "To automate scrirpt's work, pass needed arguments:"
+	echo "\t -c # || --clean # -> Clean up before building"
+	echo "\t -g # || --generate # -> Reuse old config or generate new"
+	echo "\t -i # || --img # -> Generate boot.img"
+	echo "\t -z # || --zip # -> Generate flashable zip"
+	echo "# is a numeric value; 1 for yes, 2 for no"
+	echo "If some of variables aren't defined, script will let it's"
+	echo "own free will decide..."
+	echo "/********************* END HELP! *************************/"
 }
 
 ########## FUNTIME ###############
@@ -424,4 +602,40 @@ echo "+ Using $jobs threads"
 
 echo " "
 
-start_build;
+if [[ $# == 1 ]]; then
+	case $key in
+		*)
+			print_error_msg;
+			break;;
+	esac
+elif [[ $# > 1 ]]; then
+	while [[ $# > 1 ]]; do
+		key="$1"
+		case $key in
+			-c|--clean)
+			CLEAN_UP="$2"
+			shift # past argument
+			;;
+			-g|--generate)
+			NEW_CONFIG="$2"
+			shift # past argument
+			;;
+			-i|--img)
+			BOOT_IMG_GEN="$2"
+			shift # past argument
+			;;
+			-i|--img)
+			BOOT_IMG_GEN="$2"
+			shift # past argument
+			;;
+			*)
+				print_error_msg
+				# unknown option
+			;;
+		esac
+		shift # past argument or value
+	done
+	start_build_cmd;
+else
+	start_build;
+fi
