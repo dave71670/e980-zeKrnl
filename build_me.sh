@@ -411,12 +411,12 @@ function start_build_cmd {
 	##### CHECK CONFIG BLOCK #####
 	
 	# First, let's check if user wants new configuration or to recreate
-	if [[ $NEW_CONFIG==1 ]]; then
+	if [[ $NEW_CONFIG -eq 1 ]]; then
 		echo -e "++ Removing any old configs, cleaning up and making new config"
 		# Check if old config is there, delete it and run mrproper
 		if [ -e "$PWD/.config" ]; then 
-			rm -rvf "$PWD/.config";
 			make mrproper
+			rm -rvf "$PWD/.config";
 		fi
 		
 		make $defconfig_name
@@ -436,7 +436,7 @@ function start_build_cmd {
 			echo -e "+++ ERROR: make defconfig never finished, aborting..."
 			exit
 		fi	
-	elif [[ $NEW_CONFIG==2 ]]; then
+	else
 		# Let's make sure user isn't a complete idiot...
 		echo -e "++ Checking if config exists..."
 		if [ ! -e "$PWD/.config" ]; then
@@ -453,38 +453,20 @@ function start_build_cmd {
 				echo -e "1" >> ".build_no"
 			fi	
 		fi
-	else
-		# User was a lazy ass and didn't specify a valid value for config state,
-		# so we're gonna assume that he wants new config
-		echo -e "++ Creating new config and cleaning up since there was no input about this one..."
-		make mrproper
-		make $defconfig_name
-		# Check if configuration is actually made
-		if [ -e "$PWD/.config" ]; then
-			echo -e " "
-			echo -e "+++ New configuration created!"
-			echo -e " "
-		else
-			echo -e " "
-			echo -e "+++ ERROR: make defconfig never finished, aborting..."
-			exit
-		fi	
 	fi
 	
-	##### CHECK CLEAN BLOCK #####
-	is_dirty=$(find . name "*.o" | wc -l)
-	if [[ $CLEAN_UP==1 ]]; then
+	##### CHECK CLEAN BLOCK #####	
+	if [[ $CLEAN_UP -eq 1 ]]; then
 		echo -e "++ Checking if there is something to clean..."
-		if [[ $is_dirty>0 ]]; then
+		is_dirty=$(find . -name "*.o" | wc -l)
+		if [[ $is_dirty -gt 0 ]]; then
 			echo -e "+++ Output is dirty, running make clean"
 			make clean
 		else
 			echo -e "+++ Output is not dirty, resuming..."
 		fi
-	elif [[ $CLEAN_UP==2 ]]; then
-		echo -e "++ Using dirty output... beware, Dragons passing by."
-	else 
-		echo -e "++ Wrong value for needed parameter, assuming 'keep dirty'"
+	else
+		echo -e "++ Not cleaning output. If you're running without -g paramter, build will be dirty"
 	fi
 	
 	
@@ -507,9 +489,10 @@ function start_build_cmd {
 	
 	##### CREATE BOOT.IMG #####
 	echo -e " "
-	if [[ $BOOT_IMG_GEN==1 ]]; then
+	if [[ $BOOT_IMG_GEN -eq 1 ]]; then
 		generate_bootImg
 	else 
+		echo -e "++ Not generating boot.img"
 		# Check if there is an old boot.img, and remove it.
 		if [ -e "$PWD/build_tools/boot.img" ]; then
 			echo -e "+ Removing boot.img from previous build"
@@ -518,13 +501,15 @@ function start_build_cmd {
 	fi
 	
 	##### CREATE FLASHABLE ZIP #####
-	if [[ $ZIP_GEN==1 ]]; then
-		if [[ $BOOT_IMG_GEN==2 ]]; then
+	if [[ $ZIP_GEN -eq 1 ]]; then
+		if [[ ! $BOOT_IMG_GEN -eq 1 ]]; then
 			echo -e "+ You have selected to create a new flashable zip, but you don't want to create new boot.img... Sum-ting-wrong"
 			echo -e "++ Generating new boot.img for you..."
 			generate_bootImg
 		fi
 		generate_flashableZip
+	else
+		echo -e "++ Not generating flashable zip"
 	fi
 	
 	echo -e "+++++ DONE +++++"
@@ -542,10 +527,10 @@ function print_error_msg {
 	echo -e "To use turn-table mode, don't pass any arguments."
 	echo -e " "
 	echo -e "To automate scrirpt's work, pass needed arguments:"
-	echo -e "\t -c # || --clean # -> Clean up before building"
-	echo -e "\t -g # || --generate # -> Reuse old config or generate new"
-	echo -e "\t -i # || --img # -> Generate boot.img"
-	echo -e "\t -z # || --zip # -> Generate flashable zip"
+	echo -e "\t -c || --clean -> Clean up before building"
+	echo -e "\t -g || --generate -> Generate new .config"
+	echo -e "\t -i || --img -> Generate boot.img"
+	echo -e "\t -z || --zip -> Generate flashable zip"
 	echo -e "\t -h || --help -> displays this message"
 	echo -e "# is a numeric value; 1 for yes, 2 for no"
 	echo -e "If some of variables aren't defined, script will let it's"
@@ -553,8 +538,9 @@ function print_error_msg {
 	echo -e "/********************* END HELP! *************************/"
 }
 
-########## FUNTIME ###############
+# Check-up time! Bend over please...
 
+function check_stuff {
 ## Check if you're running Arch
 echo -e "-> Checking if running on Arch Linux..."
 
@@ -601,44 +587,49 @@ echo -e "+ ARCH=$ARCH"
 echo -e "+ building config $defconfig_name"
 echo -e "+ Using $jobs threads"
 
-echo -e " "
+}
+########## FUNTIME ###############
 
-if [[ $# == 1 ]]; then
-	case $key in
-		-h|--help)
-			print_error_msg;
-			break;;
-		* )
-			print_error_msg;
-			break;;
-	esac
-elif [[ $# > 1 ]]; then
-	while [[ $# > 1 ]]; do
-		key="$1"
-		case $key in
+echo -e " "
+if [[ $# -gt 0 ]]; then
+	echo "-> Script run parameters:"
+	for i in $@; do
+		params+=" $i "
+		case $i in
+			-h|--help)
+				print_error_msg;
+				break;;
 			-c|--clean)
-			CLEAN_UP="$2"
-			shift # past argument
-			;;
+				echo -e "+ Clean before building"
+				CLEAN_UP=1
+				shift # past argument
+				;;
 			-g|--generate)
-			NEW_CONFIG="$2"
-			shift # past argument
-			;;
+				echo -e "+ Generate new config and clean"
+				NEW_CONFIG=1
+				shift # past argument
+				;;
 			-i|--img)
-			BOOT_IMG_GEN="$2"
-			shift # past argument
-			;;
-			-i|--img)
-			BOOT_IMG_GEN="$2"
-			shift # past argument
-			;;
-			*)
-				print_error_msg
-				# unknown option
-			;;
+				echo -e "+ Generate boot.img"
+				BOOT_IMG_GEN=1
+				shift # past argument
+				;;
+			-z|--zip)
+				echo -e "+ Generate flashable zip"
+				ZIP_GEN=1
+				shift # past argument
+				;;
+			* )
+				print_error_msg;
+				break;;
 		esac
 		shift # past argument or value
 	done
+	echo " "
+	echo "-> Running checks..."
+	echo " "
+	check_stuff
+	
 	start_build_cmd;
 else
 	start_build;
