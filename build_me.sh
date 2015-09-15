@@ -134,17 +134,19 @@ function generate_bootImg {
 	rm -rvf "build_tools/template_img/initrd.img"
 	rm -rvf "build_tools/template_img/zImage"
 	
-	if [ -e "$PWD/build_tools/boot.img"	]; then
-		echo -e "+ Do you want to generate flashable zip?"
-		select ans in "y" "n"; do
-			case $ans in
-				y )
-					generate_flashableZip
-					break;;
-				n)
-					break;;
-			esac
-		done
+	if [ $ZIP_GEN -eq 0 ] && [ BOOT_IMG_GEN -eq 0]; then
+		if [ -e "$PWD/build_tools/boot.img"	]; then
+			echo -e "+ Do you want to generate flashable zip?"
+				select ans in "y" "n"; do
+				case $ans in
+					y )
+						generate_flashableZip
+						break;;
+					n)
+						break;;
+				esac
+			done
+		fi
 	fi
 }
 
