@@ -546,6 +546,7 @@ function print_error_msg {
 	echo -e "\t -g # || --generate # -> Reuse old config or generate new"
 	echo -e "\t -i # || --img # -> Generate boot.img"
 	echo -e "\t -z # || --zip # -> Generate flashable zip"
+	echo -e "\t -h || --help -> displays this message"
 	echo -e "# is a numeric value; 1 for yes, 2 for no"
 	echo -e "If some of variables aren't defined, script will let it's"
 	echo -e "own free will decide..."
@@ -604,7 +605,10 @@ echo -e " "
 
 if [[ $# == 1 ]]; then
 	case $key in
-		*)
+		-h|--help)
+			print_error_msg;
+			break;;
+		* )
 			print_error_msg;
 			break;;
 	esac
