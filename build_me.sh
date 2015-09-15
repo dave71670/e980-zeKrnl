@@ -17,11 +17,11 @@
 
 ## Let me introduce myself...
 
-echo ">>>>> zeKrnl build script for LG Optimus G Pro E98x"
-echo ">>>>> Written and fixed by gromikakao@github (https://github.com/gromikakao/), based oon old script from XDA"
-echo ">>>>> Licenced as GPL, so you can share & edit, just don't make it forget who original author is"
-echo " "
-echo " "
+echo -e ">>>>> zeKrnl build script for LG Optimus G Pro E98x"
+echo -e ">>>>> Written and fixed by gromikakao@github (https://github.com/gromikakao/), based oon old script from XDA"
+echo -e ">>>>> Licenced as GPL, so you can share & edit, just don't make it forget who original author is"
+echo -e " "
+echo -e " "
 
 ## Configuration part
 
@@ -87,55 +87,55 @@ ZIP_GEN=0
 # Function to generate boot image and flashable zip
 function generate_bootImg {
 	# Check if abootimg binary exist
-	echo "-> Starting boot.img generation"
-	echo " "
+	echo -e "-> Starting boot.img generation"
+	echo -e " "
 	
-	echo "+ Checking if abootimg is in PATH.."
+	echo -e "+ Checking if abootimg is in PATH.."
 	abootimg_pwd=$(which abootimg)
 	if [ -e "$abootimg_pwd" ]; then
-		echo "++ abootimg found."
+		echo -e "++ abootimg found."
 	else
-		echo "++ abootimg binary not found; aborting"
+		echo -e "++ abootimg binary not found; aborting"
 		exit
 	fi
 	
 	# Check if there is existing, example boot.img to use as template
-	echo " "
-	echo "+ Checking if template boot.img exists..."
+	echo -e " "
+	echo -e "+ Checking if template boot.img exists..."
 	if [ -e "$PWD/build_tools/template_img/$template_bootimg" ]; then
-		echo "++ Template boot.img found, extracting"
+		echo -e "++ Template boot.img found, extracting"
 		abootimg -x "build_tools/template_img/$template_bootimg"
 		mv bootimg.cfg "build_tools/template_img/"
 		mv initrd.img "build_tools/template_img/"
 		mv zImage "build_tools/template_img/"
-		echo " "
-		echo "++ Template extracted"
+		echo -e " "
+		echo -e "++ Template extracted"
 	else
-		echo "++ Template boot.img not found, aborting."
+		echo -e "++ Template boot.img not found, aborting."
 		exit
 	fi
 	
 	# Generate new boot.img
-	echo "+ Starting generation of new boot.img"
-	echo " "
-	echo "++ Copying zImage from arch/$ARCH/boot..."
+	echo -e "+ Starting generation of new boot.img"
+	echo -e " "
+	echo -e "++ Copying zImage from arch/$ARCH/boot..."
 	cp -rvf "arch/$ARCH/boot/zImage" "build_tools/"
-	echo "++ Generating boot.img"
+	echo -e "++ Generating boot.img"
 	abootimg --create "$PWD/build_tools/boot.img" -f "$PWD/build_tools/template_img/bootimg.cfg" -k "$PWD/build_tools/zImage" -r "$PWD/build_tools/template_img/initrd.img"
 	if [ -e "$PWD/build_tools/boot.img"	]; then
-		echo "+++ Success, boot.img generated"
+		echo -e "+++ Success, boot.img generated"
 	else
-		echo "+++ Failure, boot.img not generated"
+		echo -e "+++ Failure, boot.img not generated"
 	fi
 	
 	# Cleanup
-	echo "++ Cleaning up..."
+	echo -e "++ Cleaning up..."
 	rm -rvf "build_tools/template_img/bootimg.cfg"
 	rm -rvf "build_tools/template_img/initrd.img"
 	rm -rvf "build_tools/template_img/zImage"
 	
 	if [ -e "$PWD/build_tools/boot.img"	]; then
-		echo "+ Do you want to generate flashable zip?"
+		echo -e "+ Do you want to generate flashable zip?"
 		select ans in "y" "n"; do
 			case $ans in
 				y )
@@ -150,9 +150,9 @@ function generate_bootImg {
 
 function generate_flashableZip {
 	# Generate flashable zip if boot image is created
-	echo " "
+	echo -e " "
 	if [ -e "$PWD/build_tools/boot.img"	]; then
-		echo "+ Generating flashable zip"
+		echo -e "+ Generating flashable zip"
 		# Create tmp directory if doesn't exist
 		if [ ! -d "build_tools/tmp" ]; then
 			mkdir "build_tools/tmp"
@@ -173,31 +173,31 @@ function generate_flashableZip {
 		fi
 		
 		# Copy modules
-		echo "++ Copying modules"
+		echo -e "++ Copying modules"
 		cp -rvf "drivers/crypto/msm/qce40.ko" "build_tools/tmp/zip_file/system/lib/modules"
 		cp -rvf "drivers/crypto/msm/qcedev.ko" "build_tools/tmp/zip_file/system/lib/modules"
 		cp -rvf "drivers/crypto/msm/qcrypto.ko" "build_tools/tmp/zip_file/system/lib/modules"
 		cp -rvf "drivers/scsi/scsi_wait_scan.ko" "build_tools/tmp/zip_file/system/lib/modules"
 		
-		echo " "
+		echo -e " "
 		
 		# Generate updater-script and copy
-		echo "++ Generating updater-script"
+		echo -e "++ Generating updater-script"
 		# TODO updater-script generation
 		cp -rvf "build_tools/updater-script" "build_tools/tmp/zip_file/META-INF/com/google/android/"
-		echo " "
+		echo -e " "
 		
 		# Generate ZIP
 		work_dir=$PWD
-		echo "++ Changing working dir to tmp/zip_file"
+		echo -e "++ Changing working dir to tmp/zip_file"
 		cd "build_tools/tmp/zip_file/"
-		echo "++ Creating zip file..."
+		echo -e "++ Creating zip file..."
 		zip flashable.zip -r .
-		echo "++ Returning back to work dir"
+		echo -e "++ Returning back to work dir"
 		cd $work_dir
 		
 		# Copy zip file to build_tools/out
-		echo "++ Copying flashable zip from tmp to build_tools/out"
+		echo -e "++ Copying flashable zip from tmp to build_tools/out"
 		cp -rvf "$PWD/build_tools/tmp/zip_file/flashable.zip" "$PWD/build_tools/out/flashable.zip"
 		
 		# Get build num
@@ -208,39 +208,39 @@ function generate_flashableZip {
 		# Renaming zip file
 		ZIP_FILE_NAME="$KERNEL_NAME$KERNEL_VERSION-$TIMESTAMP$BUILD_NUM.zip"
 		ZIP_FILE_NAME_SIGNED="$KERNEL_NAME$KERNEL_VERSION-$TIMESTAMP$BUILD_NUM-SIGNED.zip"
-		echo "++ Renaming zip file to $ZIP_FILE_NAME"
+		echo -e "++ Renaming zip file to $ZIP_FILE_NAME"
 		mv "$PWD/build_tools/out/flashable.zip" "$PWD/build_tools/out/$ZIP_FILE_NAME"
-		echo " "
+		echo -e " "
 		
 		# Sign zip file
-		echo "++ Signing zip file"
+		echo -e "++ Signing zip file"
 		java -jar "build_tools/tools/SignApk/signapk.jar" "build_tools/tools/SignApk/testkey.x509.pem" "build_tools/tools/SignApk/testkey.pk8" "build_tools/out/$ZIP_FILE_NAME" "build_tools/out/$ZIP_FILE_NAME_SIGNED"
-		echo "++ Done."	
+		echo -e "++ Done."	
 		
 		# Generate MD5 sums for zips
-		echo " "
-		echo "++ Generating MD5 sums for zip files..."
+		echo -e " "
+		echo -e "++ Generating MD5 sums for zip files..."
 		cur_dir="$PWD"
 		cd "$PWD/build_tools/out/"
 		md5sum_nosign=$(md5sum $ZIP_FILE_NAME)
 		md5sum_sign=$(md5sum $ZIP_FILE_NAME_SIGNED)
 		cd "$cur_dir"
-		echo "++ $md5sum_nosign"
-		echo "++ $md5sum_sign"
+		echo -e "++ $md5sum_nosign"
+		echo -e "++ $md5sum_sign"
 		echo $md5sum_nosign >> "$PWD/build_tools/out/$ZIP_FILE_NAME.md5sum"
 		echo $md5sum_sign >> "$PWD/build_tools/out/$ZIP_FILE_NAME_SIGNED.md5sum"
 	
 		
 		# Cleanup
-		echo " "
-		echo "++ Removing tmp directory"
+		echo -e " "
+		echo -e "++ Removing tmp directory"
 		rm -rvf "build_tools/tmp"
 		
 		# Inform
-		echo " "
-		echo "++ Your flashable zip can be found in $PWD/build_tools/out"
-		echo "++ Unsigned flashable zip: $ZIP_FILE_NAME"
-		echo "++ Signed flashable zip: $ZIP_FILE_NAME_SIGNED"
+		echo -e " "
+		echo -e "++ Your flashable zip can be found in $PWD/build_tools/out"
+		echo -e "++ Unsigned flashable zip: $ZIP_FILE_NAME"
+		echo -e "++ Signed flashable zip: $ZIP_FILE_NAME_SIGNED"
 
 	fi
 }
@@ -250,71 +250,71 @@ function generate_flashableZip {
 function start_build {
 	mess=0
 	
-	echo "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
-	echo " "
+	echo -e "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
+	echo -e " "
 	
 	# Let's check does defconfig file exist
-	echo "+ Checking if $defconfig_name exists in $PWD/arch/$ARCH/configs/"
+	echo -e "+ Checking if $defconfig_name exists in $PWD/arch/$ARCH/configs/"
 	if [ ! -e "$PWD/arch/$ARCH/configs/$defconfig_name" ]; then
-		echo "++ ERROR: defconfig doesn't exist. Check the filename and file presence and try again"
+		echo -e "++ ERROR: defconfig doesn't exist. Check the filename and file presence and try again"
 		exit
 	fi
 	
-	echo " "
+	echo -e " "
 	# Let's check if make defconfig was already run
-	echo "+ Checking for existing configuration..."
+	echo -e "+ Checking for existing configuration..."
 	if [ ! -e "$PWD/.config" ]; then
-		echo "++ Kernel configuration not found. Creating new..."
+		echo -e "++ Kernel configuration not found. Creating new..."
 		make $defconfig_name;
 		if [ -e ".build_no" ]; then
 			rm -rvf ".build_no"
-			echo "1" >> ".build_no"
+			echo -e "1" >> ".build_no"
 		else
-			echo "1" >> ".build_no"
+			echo -e "1" >> ".build_no"
 		fi		
 		
 		# Check if configuration is actually made
 		if [ -e "$PWD/.config" ]; then
-			echo " "
-			echo "+++ New configuration created, cleaning mess..."
-			echo " "
+			echo -e " "
+			echo -e "+++ New configuration created, cleaning mess..."
+			echo -e " "
 			make clean
 		else
-			echo " "
-			echo "+++ ERROR: make defconfig never finished, aborting..."
+			echo -e " "
+			echo -e "+++ ERROR: make defconfig never finished, aborting..."
 			exit
 		fi
 	else
-		echo "++ Kernel configuration found. Do you want to reuse it or write new?"
+		echo -e "++ Kernel configuration found. Do you want to reuse it or write new?"
 		select ans in "New" "Reuse"; do
 			case $ans in
 				New )
-					echo " "
-					echo "+++ Clean up..."
+					echo -e " "
+					echo -e "+++ Clean up..."
 					make mrproper
-					echo " "
-					echo "+++ Writing new .config file...";
+					echo -e " "
+					echo -e "+++ Writing new .config file...";
 					make $defconfig_name;
 					
 					# Set build_num variable
 					if [ -e ".build_no" ]; then
 						rm -rvf ".build_no"
-						echo "1" >> ".build_no"
+						echo -e "1" >> ".build_no"
 					else
-						echo "1" >> ".build_no"
+						echo -e "1" >> ".build_no"
 					fi	
 					
 					# Check if configuration is actually made
 					if [ -f "$PWD/.config" ]; then
-						echo "++++ New configuration created"
+						echo -e "++++ New configuration created"
 					else
-						echo "++++ ERROR: make defconfig never finished, aborting..."
+						echo -e "++++ ERROR: make defconfig never finished, aborting..."
 						exit
 					fi
 					break;;
 				Reuse )
-					echo "+++ Configuration will be reused"
-					echo " "
+					echo -e "+++ Configuration will be reused"
+					echo -e " "
 					mess=1
 					
 					# Set build_num variable
@@ -322,9 +322,9 @@ function start_build {
 						old_build_num=`cat .build_no`
 						new_build_num=$((old_build_num+1))
 						rm -r ".build_no"
-						echo "$new_build_num" >> ".build_no"
+						echo -e "$new_build_num" >> ".build_no"
 					else
-						echo "1" >> ".build_no"
+						echo -e "1" >> ".build_no"
 					fi	
 					
 					break;;
@@ -333,12 +333,12 @@ function start_build {
 	fi
 	
 	if [ $mess == 1 ]; then
-		echo "+ Your build folder is 'dirty', do you want to clean it?"
+		echo -e "+ Your build folder is 'dirty', do you want to clean it?"
 		select ans in "y" "n"; do
 			case $ans in
 				y )
-					echo "++ Cleaning build dir..."
-					echo " "
+					echo -e "++ Cleaning build dir..."
+					echo -e " "
 					make clean
 					$(mess=0)
 					break;;
@@ -348,71 +348,71 @@ function start_build {
 		done
 	fi
 	
-	echo " "		
+	echo -e " "		
 	# Check for any last minute changes
-	echo "+ Everything looks steady and ready. Do you want to make some final changes to the config?"
+	echo -e "+ Everything looks steady and ready. Do you want to make some final changes to the config?"
 	select yn in "y" "n"; do
 		case $yn in
 			y ) 
-				echo "++ Running make menuconfig. Don't forget to save!";
-				echo " ";
+				echo -e "++ Running make menuconfig. Don't forget to save!";
+				echo -e " ";
 				make menuconfig;
 				break;;
 			n ) 
-				echo "++ Ok, ready to continue."
-				echo " "
+				echo -e "++ Ok, ready to continue."
+				echo -e " "
 				break;;
 		esac
 	done
-	echo "+ Press any key to start."
+	echo -e "+ Press any key to start."
 	read blah
-	echo " "
-	echo "++ Starting build #$(cat .build_no)"
-	echo " "				
+	echo -e " "
+	echo -e "++ Starting build #$(cat .build_no)"
+	echo -e " "				
 	time make -j$jobs;
 	
 	# Check if build was a success and if yes, ask user for boot.img generation
 	if [ -e "$PWD/arch/$ARCH/boot/zImage" ]; then
-		echo " "
-		echo "+ Build successful. Do you want to generate boot img?"
+		echo -e " "
+		echo -e "+ Build successful. Do you want to generate boot img?"
 		select bla in "y" "n"; do
 			case $bla in
 				y ) 
 					generate_bootImg
-					echo " "
-					echo "+++++++++++++++ FINISHED +++++++++++++++++"
+					echo -e " "
+					echo -e "+++++++++++++++ FINISHED +++++++++++++++++"
 					break;;
 				n )
-					echo "+++++++++++++++ FINISHED +++++++++++++++++"
+					echo -e "+++++++++++++++ FINISHED +++++++++++++++++"
 					exit;;
 			esac
 		done
 	else
-		echo " "
-		echo "+ Build failed; check output for errors and try again after fixing them"
+		echo -e " "
+		echo -e "+ Build failed; check output for errors and try again after fixing them"
 		exit
 	fi
 }
 
 ## Function to start build with parameters given on command-line
 function start_build_cmd {
-	echo "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
-	echo " "
+	echo -e "-> Starting build of $KERNEL_NAME$KERNEL_VERSION"
+	echo -e " "
 	
 	# Let's check does defconfig file exist
-	echo "+ Checking if $defconfig_name exists in $PWD/arch/$ARCH/configs/"
+	echo -e "+ Checking if $defconfig_name exists in $PWD/arch/$ARCH/configs/"
 	if [ ! -e "$PWD/arch/$ARCH/configs/$defconfig_name" ]; then
-		echo "++ ERROR: defconfig doesn't exist. Check the filename and file presence and try again"
+		echo -e "++ ERROR: defconfig doesn't exist. Check the filename and file presence and try again"
 		exit
 	fi
 	
-	echo " "
+	echo -e " "
 	
 	##### CHECK CONFIG BLOCK #####
 	
 	# First, let's check if user wants new configuration or to recreate
 	if [[ $NEW_CONFIG==1 ]]; then
-		echo "++ Removing any old configs, cleaning up and making new config"
+		echo -e "++ Removing any old configs, cleaning up and making new config"
 		# Check if old config is there, delete it and run mrproper
 		if [ -e "$PWD/.config" ]; then 
 			rm -rvf "$PWD/.config";
@@ -424,49 +424,49 @@ function start_build_cmd {
 		if [ -e ".build_no" ]; then
 			rm -rvf ".build_no"
 		fi
-		echo "1" >> ".build_no"
+		echo -e "1" >> ".build_no"
 		
 		# Check if configuration is actually made
 		if [ -e "$PWD/.config" ]; then
-			echo " "
-			echo "+++ New configuration created!"
-			echo " "
+			echo -e " "
+			echo -e "+++ New configuration created!"
+			echo -e " "
 		else
-			echo " "
-			echo "+++ ERROR: make defconfig never finished, aborting..."
+			echo -e " "
+			echo -e "+++ ERROR: make defconfig never finished, aborting..."
 			exit
 		fi	
 	elif [[ $NEW_CONFIG==2 ]]; then
 		# Let's make sure user isn't a complete idiot...
-		echo "++ Checking if config exists..."
+		echo -e "++ Checking if config exists..."
 		if [ ! -e "$PWD/.config" ]; then
-			echo "+++ Config doesn't exist, creating!"
+			echo -e "+++ Config doesn't exist, creating!"
 			make $defconfig_name
 		else
-			echo "+++ Config found, resuming normal operation"
+			echo -e "+++ Config found, resuming normal operation"
 			if [ -e ".build_no" ]; then
 				old_build_num=`cat .build_no`
 				new_build_num=$((old_build_num+1))
 				rm -r ".build_no"
-				echo "$new_build_num" >> ".build_no"
+				echo -e "$new_build_num" >> ".build_no"
 			else
-				echo "1" >> ".build_no"
+				echo -e "1" >> ".build_no"
 			fi	
 		fi
 	else
 		# User was a lazy ass and didn't specify a valid value for config state,
 		# so we're gonna assume that he wants new config
-		echo "++ Creating new config and cleaning up since there was no input about this one..."
+		echo -e "++ Creating new config and cleaning up since there was no input about this one..."
 		make mrproper
 		make $defconfig_name
 		# Check if configuration is actually made
 		if [ -e "$PWD/.config" ]; then
-			echo " "
-			echo "+++ New configuration created!"
-			echo " "
+			echo -e " "
+			echo -e "+++ New configuration created!"
+			echo -e " "
 		else
-			echo " "
-			echo "+++ ERROR: make defconfig never finished, aborting..."
+			echo -e " "
+			echo -e "+++ ERROR: make defconfig never finished, aborting..."
 			exit
 		fi	
 	fi
@@ -474,45 +474,45 @@ function start_build_cmd {
 	##### CHECK CLEAN BLOCK #####
 	is_dirty=$(find . name "*.o" | wc -l)
 	if [[ $CLEAN_UP==1 ]]; then
-		echo "++ Checking if there is something to clean..."
+		echo -e "++ Checking if there is something to clean..."
 		if [[ $is_dirty>0 ]]; then
-			echo "+++ Output is dirty, running make clean"
+			echo -e "+++ Output is dirty, running make clean"
 			make clean
 		else
-			echo "+++ Output is not dirty, resuming..."
+			echo -e "+++ Output is not dirty, resuming..."
 		fi
 	elif [[ $CLEAN_UP==2 ]]; then
-		echo "++ Using dirty output... beware, Dragons passing by."
+		echo -e "++ Using dirty output... beware, Dragons passing by."
 	else 
-		echo "++ Wrong value for needed parameter, assuming 'keep dirty'"
+		echo -e "++ Wrong value for needed parameter, assuming 'keep dirty'"
 	fi
 	
 	
 	##### RUN THE BUILD #####
-	echo "+ All set. Starting build"
-	echo " "
-	echo "++ Starting build #$(cat .build_no)"
-	echo " "				
+	echo -e "+ All set. Starting build"
+	echo -e " "
+	echo -e "++ Starting build #$(cat .build_no)"
+	echo -e " "				
 	time make -j$jobs;
 	
 	# Check if build was a success and if yes, ask user for boot.img generation
 	if [ -e "$PWD/arch/$ARCH/boot/zImage" ]; then
-		echo " "
-		echo "+ Build successful."
+		echo -e " "
+		echo -e "+ Build successful."
 	else
-		echo " "
-		echo "+ Build failed; check output for errors and try again after fixing them"
+		echo -e " "
+		echo -e "+ Build failed; check output for errors and try again after fixing them"
 		exit
 	fi
 	
 	##### CREATE BOOT.IMG #####
-	echo " "
+	echo -e " "
 	if [[ $BOOT_IMG_GEN==1 ]]; then
 		generate_bootImg
 	else 
 		# Check if there is an old boot.img, and remove it.
 		if [ -e "$PWD/build_tools/boot.img" ]; then
-			echo "+ Removing boot.img from previous build"
+			echo -e "+ Removing boot.img from previous build"
 			rm -rvf "$PWD/build_tools/boot.img"
 		fi
 	fi
@@ -520,14 +520,14 @@ function start_build_cmd {
 	##### CREATE FLASHABLE ZIP #####
 	if [[ $ZIP_GEN==1 ]]; then
 		if [[ $BOOT_IMG_GEN==2 ]]; then
-			echo "+ You have selected to create a new flashable zip, but you don't want to create new boot.img... Sum-ting-wrong"
-			echo "++ Generating new boot.img for you..."
+			echo -e "+ You have selected to create a new flashable zip, but you don't want to create new boot.img... Sum-ting-wrong"
+			echo -e "++ Generating new boot.img for you..."
 			generate_bootImg
 		fi
 		generate_flashableZip
 	fi
 	
-	echo "+++++ DONE +++++"
+	echo -e "+++++ DONE +++++"
 	
 }
 
@@ -538,69 +538,69 @@ function createVenv {
 
 ## Print help message if some of script parameters are bad
 function print_error_msg {
-	echo "/*********************** HELP! ***************************/"
-	echo "To use turn-table mode, don't pass any arguments."
-	echo " "
-	echo "To automate scrirpt's work, pass needed arguments:"
-	echo "\t -c # || --clean # -> Clean up before building"
-	echo "\t -g # || --generate # -> Reuse old config or generate new"
-	echo "\t -i # || --img # -> Generate boot.img"
-	echo "\t -z # || --zip # -> Generate flashable zip"
-	echo "# is a numeric value; 1 for yes, 2 for no"
-	echo "If some of variables aren't defined, script will let it's"
-	echo "own free will decide..."
-	echo "/********************* END HELP! *************************/"
+	echo -e "/*********************** HELP! ***************************/"
+	echo -e "To use turn-table mode, don't pass any arguments."
+	echo -e " "
+	echo -e "To automate scrirpt's work, pass needed arguments:"
+	echo -e "\t -c # || --clean # -> Clean up before building"
+	echo -e "\t -g # || --generate # -> Reuse old config or generate new"
+	echo -e "\t -i # || --img # -> Generate boot.img"
+	echo -e "\t -z # || --zip # -> Generate flashable zip"
+	echo -e "# is a numeric value; 1 for yes, 2 for no"
+	echo -e "If some of variables aren't defined, script will let it's"
+	echo -e "own free will decide..."
+	echo -e "/********************* END HELP! *************************/"
 }
 
 ########## FUNTIME ###############
 
 ## Check if you're running Arch
-echo "-> Checking if running on Arch Linux..."
+echo -e "-> Checking if running on Arch Linux..."
 
 distro=`cat /etc/os-release | grep ID |  cut -d'=' -f 2`
 
 if [ "$distro" == "arch" ]; then
-	echo "+ Running on Arch Linux"
+	echo -e "+ Running on Arch Linux"
 	if [ -d "$venv_path" ]; then
-		echo "++ python27 virtual env. installed in $venv_path, activating"
+		echo -e "++ python27 virtual env. installed in $venv_path, activating"
 		source "$venv_path/bin/activate"
 	else
-		echo "++ python27 virtual env. not found, checking if installer is present..."
+		echo -e "++ python27 virtual env. not found, checking if installer is present..."
 		pyvenv_path=$(which pyvenv)
 		if [ -e "$pyvenv_path" ]; then
-			echo "+++ pyvenv available, installing..."
+			echo -e "+++ pyvenv available, installing..."
 			createVenv
 		else
-			echo "+++ pyvenv binary not found, aborting..."
+			echo -e "+++ pyvenv binary not found, aborting..."
 			exit
 		fi
 	fi
 fi
 
-echo " "
+echo -e " "
 
 ### Check for toolchains
-echo "-> Checking if toolchain is installed..."
+echo -e "-> Checking if toolchain is installed..."
 
 toolchain_path="$toolchains_dir/$toolchain_name/bin/arm-cortex_a15-linux-gnueabihf-"
 if [ -d "$toolchains_dir/$toolchain_name/bin/" ]; then
-	echo "+ Toolchain path set to $toolchain_path"
+	echo -e "+ Toolchain path set to $toolchain_path"
 else
-	echo "+ Toolchain not found on $toolchain_path, aborting..."
+	echo -e "+ Toolchain not found on $toolchain_path, aborting..."
 	exit
 fi
 
 ### We're alive, let's create needed variables
-echo " "
-echo "-> Setting variables:"
+echo -e " "
+echo -e "-> Setting variables:"
 export CROSS_COMPILE=$toolchain_path
-echo "+ CROSS_COMPILE=$CROSS_COMPILE"
+echo -e "+ CROSS_COMPILE=$CROSS_COMPILE"
 export ARCH=$device_arch
-echo "+ ARCH=$ARCH"
-echo "+ building config $defconfig_name"
-echo "+ Using $jobs threads"
+echo -e "+ ARCH=$ARCH"
+echo -e "+ building config $defconfig_name"
+echo -e "+ Using $jobs threads"
 
-echo " "
+echo -e " "
 
 if [[ $# == 1 ]]; then
 	case $key in
