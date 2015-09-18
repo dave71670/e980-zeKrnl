@@ -15,24 +15,27 @@ based ROMs will support it. I myself I'm using it on PAC 4.4.~~
 
 Since 07. september 2015 this kernel supports BOTH KitKat and Lollipop (CM11.0 AND CM12.1) ROMs.
 Sources for both versions can be found on their branches:
-- **kk-stable**, for CM11.0 and CM11.0 based ROMs
-- **lp-stable**, for CM12.1 and CM12.1 based ROMs (note: haven't tested it on CM12.0, but it should work. Try it and tell me)
+- **kk-main**, for CM11.0 and CM11.0 based ROMs
+- **lp-main**, for CM12.1 and CM12.1 based ROMs (note: haven't tested it on CM12.0, but it should work. Try it and tell me)
 
 ## Branching and versioning
 
 Since I'm too lazy to write another README for every branch I have:
 
 - **master** branch is used as a starting point. Highly stable, but will not be updated after v1.3
-- **kk-stable** and **lp-stable** are main stable branches. Those are the ones you want to build from, and they will be updated.
-- **caf/LA.AF.1.1_rb1.18** and **e980-kk-LA.AF** are pure CAF msm8960/apq8064 code, so don't try to do anything with them.
-- **lp-testing** and **kk-dev** are main development branches; you may try to build something, but there is no warranty it will work.
-- random branches with exp, experimental,danger,whoa etc. in names - don't touch, or kittens will die.
+- **kk-main** and **lp-main** are main stable branches. Those are the ones you want to build from, and they will be updated.
+- **caf/LA.AF.1.1_rb1.18** and **e980-kk-LA.AF** are pure CAF msm8960/apq8064 code, so don't try to do anything with them. WILL BE REMOVED SOON
+- **lp-dev** and **kk-dev** are main development branches
+- every other branch which is not mentioned here is experimental or work in progress and shouldn't be tinkered with.
 
-Current STABLE version is tagged as v1.4. Ignore the fact that there is no version 1.2.
+~~Current STABLE **KitKat** version is tagged as v1.4. There is no stable lollipop version yet, haven't got enough time to test it.
+Ignore the fact that there is no version 1.2.~~
+
+Tagging system was abandoned due to differences in kernels. *Stable* and *semi-stable* (lp, really needs more tinkering) versions can be found in -dev || -main branches.
 
 ## Progress
 
-Current version is **v1.4**.
+Current version is **v1.4** (v1.4.2 for Lollipop).
 
 - [x] CPU Governors
 	- [x] Intellidemand
@@ -43,6 +46,7 @@ Current version is **v1.4**.
 	- [x] SmartassV2
 	- [x] Adaptive
 	- [x] ondemandPLUS
+	- [x] IntelliMinMax [only in lp-* for now]
 - [x] Thermal control
 	- [x] Thermald
 	- [x] Intellithermal
@@ -65,17 +69,19 @@ Current version is **v1.4**.
 	- [x] yeah
 	- [x] illinois
 - [x] CPU input boost
-- [x] CPU retain policy (thanks EmmanuelU)
-- [ ] Stock (LG) camera driver [reverted, missing file]
-- [x] Faux sound
+- [x] CPU retain policy (thanks to EmmanuelU)
+- [x] CPU freq limit (thanks to Faux123)
+- [ ] Stock (LG) camera driver [reverted, missing file(s)] {ABANDONED}
+- [x] Faux sound control
 - [x] Fast charge
-- [ ] exFAT support [in code, needs more patching]
+- [ ] exFAT support [needs more patching]
+- [x] Gamma control [in lp-* branches, needs backport to kk]
 - [x] Voltage control
-- [ ] CPU overclocking
+- [ ] CPU overclocking [need more time to play with freq tables]
 - [ ] GPU overclocking
 - [x] Double tap to wake
 - [x] Sweep2Wake & Sweep2Sleep
-- [ ] Update to newer kernel-3.4 repos [trying to figure out how]
-- [x] Support for Lollipop (CM12.x) [in testing] and later Android M [are you kidding me, it isn't even released yet]
+- [ ] Update to newer kernel-3.4 repos [in progress...]
+- [x] Support for Lollipop (CM12.x) and later Android M [after it gets an official release]
+- [x] Ultra-cool semi-automated build script with boot.img and flashable zip generation [WIP]
 - [ ] Additional tweaks and features -> feel free to ask & request
-- [x] Ultra-cool semi-automated build script with boot.img and flashable zip generation
