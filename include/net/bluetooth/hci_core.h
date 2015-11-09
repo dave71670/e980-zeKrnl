@@ -1,6 +1,7 @@
 /*
    BlueZ - Bluetooth protocol stack for Linux
-   Copyright (c) 2000-2001, 2010-2012, Code Aurora Forum. All rights reserved.
+   Copyright (c) 2000-2001, The Linux Foundation. All rights reserved.
+   Copyright (c) 2010-2013, The Linux Foundation. All rights reserved.
 
    Written 2000,2001 by Maxim Krasnyansky <maxk@qualcomm.com>
 
@@ -356,6 +357,7 @@ struct hci_conn {
 	void		*smp_conn;
 	struct timer_list smp_timer;
 	__u8		conn_valid;
+	__u8		hidp_session_valid;
 
 
 	void (*connect_cfm_cb)	(struct hci_conn *conn, u8 status);
@@ -383,7 +385,7 @@ extern rwlock_t hci_cb_list_lock;
 
 /* ----- Inquiry cache ----- */
 #define INQUIRY_CACHE_AGE_MAX   (HZ*30)   /* 30 seconds */
-#define INQUIRY_ENTRY_AGE_MAX   (HZ*60)   /* 60 seconds */
+#define INQUIRY_ENTRY_AGE_MAX   (HZ*60*60)   /* 1 Hour */
 
 #define inquiry_cache_lock(c)		spin_lock(&c->lock)
 #define inquiry_cache_unlock(c)		spin_unlock(&c->lock)
@@ -424,8 +426,6 @@ enum {
 	HCI_CONN_RSWITCH_PEND,
 	HCI_CONN_MODE_CHANGE_PEND,
 	HCI_CONN_SCO_SETUP_PEND,
-//QCT_Local : Mozen Carkit SCO Noise issue 13.01.03
-	HCI_CONN_CHANGE_LP_DURING_CONNECTION, // jasper disable_sniff
 };
 
 static inline void hci_conn_hash_init(struct hci_dev *hdev)
@@ -617,11 +617,6 @@ void hci_disconnect(struct hci_conn *conn, __u8 reason);
 void hci_disconnect_amp(struct hci_conn *conn, __u8 reason);
 
 void hci_conn_enter_active_mode(struct hci_conn *conn, __u8 force_active);
-// [S] LGE_BT: MOD/ilbeom.kim/'12-09-18 - [GK] Merged based on G project
-// +s LGBT_COMMON_FUNCTION_NO_SNIFF_WHEN_OPEN_SCO
-void hci_conn_enter_active_mode_no_timer(struct hci_conn *conn);
-// +e LGBT_COMMON_FUNCTION_NO_SNIFF_WHEN_OPEN_SCO
-// [E] LGE_BT: MOD/ilbeom.kim/'12-09-18 - [GK] Merged based on G project
 void hci_conn_enter_sniff_mode(struct hci_conn *conn);
 
 void hci_conn_hold_device(struct hci_conn *conn);
@@ -630,8 +625,6 @@ void hci_conn_put_device(struct hci_conn *conn);
 void hci_conn_set_rssi_reporter(struct hci_conn *conn,
 		s8 rssi_threshold, u16 interval, u8 updateOnThreshExceed);
 void hci_conn_unset_rssi_reporter(struct hci_conn *conn);
-//QCT_Local : Mozen Carkit SCO Noise issue 13.01.03
-int hci_conn_change_link_policy(struct hci_conn *conn, __u8 lp);  //jasper disable_sniff
 
 static inline void hci_conn_hold(struct hci_conn *conn)
 {
@@ -1117,6 +1110,9 @@ void hci_le_conn_update(struct hci_conn *conn, u16 min, u16 max,
 					u16 latency, u16 to_multiplier);
 void hci_le_start_enc(struct hci_conn *conn, __le16 ediv, __u8 rand[8],
 							__u8 ltk[16]);
+void hci_le_ltk_reply(struct hci_conn *conn, u8 ltk[16]);
+void hci_le_ltk_neg_reply(struct hci_conn *conn);
+
 void hci_read_rssi(struct hci_conn *conn);
 
 #endif /* __HCI_CORE_H */
